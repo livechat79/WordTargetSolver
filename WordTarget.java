@@ -1,14 +1,39 @@
-/**
+/*******************************************************************************
+ *  The MIT License (MIT)
+ *
+ *  Copyright (c) 2015 Thomas Mckeesick
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to 
+ *  deal in the Software without restriction, including without limitation the 
+ *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+ *  sell copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in 
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ *  IN THE SOFTWARE.
+ *
+ *******************************************************************************
+ *
  * Class Name:        WordTarget
  *
  * @author:           Thomas McKeesick
- * Creation Date:     Monday, February 16 2015, 02:25 
- * Last Modified:     Tuesday, March 03 2015, 11:25
- * 
+ * Creation Date:     Monday, February 16 2015, 02:25
+ * Last Modified:     Tuesday, March 03 2015, 17:57
+ *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
  *
- * @version 0.2.0
+ * @version 0.2.1     Now includes "impossible.txt" file, ignores impossible
+ *                    starting strings when permuting.
  */
 
 import java.util.List;
@@ -24,28 +49,32 @@ import java.io.IOException;
 public class WordTarget {
 
     private static int MIN_LENGTH = 4;
+    private static int count = 0;
     private static List<String> dict;
+    private static List<String> impArr;
 
     public static void main(String[] args) {
-
-        if( args.length < 2 ) {
-            System.err.println("Usage: java Wordsquare <dictionary> <puzzle>");
-            System.exit(1);
-        } else if( args.length == 3 ) {
-            MIN_LENGTH = Integer.parseInt(args[2]);
+        if( args.length < 3 ) {
+        System.err.println(
+            "Usage: java Wordsquare <puzzle> <dictionary> <impFile>");
+                    System.exit(1);
+        } else if( args.length == 4 ) {
+            MIN_LENGTH = Integer.parseInt(args[3]);
         }
 
         long startTime = System.currentTimeMillis();
 
-        dict = loadDict(args[0]);
-        char[] grid = loadPuzzle(args[1]);
+        char[] grid = loadPuzzle(args[0]);
+        loadDict(args[1]);
+        loadImpFile(args[2]);
+
         List<String> results = findStrings(grid);
 
         System.out.println("WORD GRID:");
         System.out.println(grid[0] + " " + grid[1] + " " + grid[2] + "\n" +
                            grid[3] + " " + grid[4] + " " + grid[5] + "\n" +
                            grid[6] + " " + grid[7] + " " + grid[8] + "\n");
-        
+
         //Removes duplicates from array, then adds back into original array
         HashSet<String> set = new HashSet<String>();
         set.addAll(results);
@@ -75,10 +104,11 @@ public class WordTarget {
         r.gc();
 
         long endTime = System.currentTimeMillis();
-        System.out.println("Time taken: " + (endTime - startTime) + 
+        System.out.println("\n\n\nTime taken: " + (endTime - startTime) +
                            " milliseconds");
-        System.out.println("Memory used: " + 
-                    ((r.totalMemory() - r.freeMemory())/1024/1024) + " MB");
+        System.out.println("Memory used: " +
+                    ((r.totalMemory() - r.freeMemory())/1024) + " kB");
+        System.out.println("Strings produced: " + count);
         System.exit(0);
     }
 
@@ -111,7 +141,7 @@ public class WordTarget {
             }
         } catch( IOException e ) {
             System.err.println("A file error occurred: " + filename +
-                               "Error message: " + e.getMessage() + 
+                               "Error message: " + e.getMessage() +
                                e.getStackTrace());
             System.exit(1);
         }
@@ -123,7 +153,7 @@ public class WordTarget {
      * @param filename The dictionary file to load
      * @return The ArrayList containing the dictionary
      */
-    private static List<String> loadDict(String filename) {
+    private static void loadDict(String filename) {
         dict = new ArrayList<String>();
         try {
             BufferedReader in = new BufferedReader(
@@ -133,7 +163,32 @@ public class WordTarget {
                 dict.add(word);
             }
         } catch( IOException e ) {
-            System.err.println("A file error occurred: " + filename );
+            System.err.println("A file error occurred: " + filename+
+                               "Error message: " + e.getMessage() +
+                               e.getStackTrace());
+            System.exit(1);
+        }
+    }
+
+
+        /**
+     * A method that loads a dictionary text file into a tree structure
+     * @param filename The dictionary file to load
+     * @return The ArrayList containing the dictionary
+     */
+    private static List<String> loadImpFile(String filename) {
+        impArr = new ArrayList<String>();
+        try {
+            BufferedReader in = new BufferedReader(
+                    new FileReader(filename));
+            String word;
+            while( (word = in.readLine()) != null ) {
+                impArr.add(word);
+            }
+        } catch( IOException e ) {
+            System.err.println("A file error occurred: " + filename+
+                               "Error message: " + e.getMessage() +
+                               e.getStackTrace());
             System.exit(1);
         }
         return dict;
@@ -149,9 +204,9 @@ public class WordTarget {
         List<String> tmp = new ArrayList<String>();
         String str = new String(grid);
         char centre = grid[4];
-        tmp = permute(tmp, str, MIN_LENGTH, 
+        tmp = permute(tmp, str, MIN_LENGTH,
                 String.valueOf(centre));
-        return tmp;        
+        return tmp;
     }
 
     /**
@@ -163,7 +218,7 @@ public class WordTarget {
      * @param centre The "centre" letter that each word must contain
      * @return The ArrayList of all dictionary words found in str
      */
-    private static List<String> permute(List<String> words, String str, 
+    private static List<String> permute(List<String> words, String str,
                                         int minLength, CharSequence centre) {
         permute("", str, words, minLength, centre);
         return words;
@@ -176,16 +231,21 @@ public class WordTarget {
      * and is contained in the dictionary. If so, adds it to the ArrayList
      * of strings to be returned.
      */
-    private static void permute(String prefix, String str, List<String> words, 
+    private static void permute(String prefix, String str, List<String> words,
                                 int minLength, CharSequence centre) {
+        count++;
         int length = str.length();
-        if(prefix.length() >= minLength && prefix.contains(centre) && 
+        if(Collections.binarySearch(impArr, prefix.toLowerCase()) >= 0) {
+            //System.out.println("Sk")
+            return;
+        }
+        if(prefix.length() >= minLength && prefix.contains(centre) &&
                 Collections.binarySearch(dict, prefix.toLowerCase()) >= 0) {
             words.add(prefix.toLowerCase());
         }
         if( length != 0 ) {
             for(int i = 0; i < length; i++) {
-                permute(prefix + str.charAt(i), 
+                permute(prefix + str.charAt(i),
                     str.substring(0, i) + str.substring(i+1, length),
                     words, minLength, centre);
             }
