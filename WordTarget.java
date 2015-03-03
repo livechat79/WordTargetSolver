@@ -1,16 +1,17 @@
 /**
- * Class Name:        Target
+ * Class Name:        WordTarget
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25 
- * Last Modified:     Monday, February 16 2015, 02:29
+ * Last Modified:     Tuesday, March 03 2015, 11:25
  * 
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
  *
- * @version 0.1.4
+ * @version 0.2.0
  */
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Collections;
@@ -22,45 +23,30 @@ import java.io.IOException;
 
 public class WordTarget {
 
-    private static char CENTRE;
     private static int MIN_LENGTH = 4;
-    private static char[] grid = new char[9];
-    private static ArrayList<String> dict;
-    private static ArrayList<String> results;
+    private static List<String> dict;
 
     public static void main(String[] args) {
 
         if( args.length < 2 ) {
             System.err.println("Usage: java Wordsquare <dictionary> <puzzle>");
             System.exit(1);
-        }else if( args.length == 3 ) {
+        } else if( args.length == 3 ) {
             MIN_LENGTH = Integer.parseInt(args[2]);
         }
 
-        solvePuzzle(args[0], args[1]);
-
-        System.exit(0);
-    }
-
-    /**
-     * Public method to solve a puzzle from a textfile, calls private methods
-     * @param dictFilename The dictionary file to load
-     * @param puzzleFilename The puzzle file to load
-     * @return The ArrayList of solutions
-     */
-    public static ArrayList<String> solvePuzzle(String dictFilename, 
-                                                String puzzleFilename) {
         long startTime = System.currentTimeMillis();
 
-        dict = loadDict(dictFilename);
-        grid = loadPuzzle(puzzleFilename);
-        results = findStrings(grid);
+        dict = loadDict(args[0]);
+        char[] grid = loadPuzzle(args[1]);
+        List<String> results = findStrings(grid);
 
         System.out.println("WORD GRID:");
         System.out.println(grid[0] + " " + grid[1] + " " + grid[2] + "\n" +
                            grid[3] + " " + grid[4] + " " + grid[5] + "\n" +
                            grid[6] + " " + grid[7] + " " + grid[8] + "\n");
         
+        //Removes duplicates from array, then adds back into original array
         HashSet<String> set = new HashSet<String>();
         set.addAll(results);
         results.clear();
@@ -69,9 +55,9 @@ public class WordTarget {
         Collections.sort(results);
 
         System.out.println("Found " + results.size() + " results with " +
-                           4 + " letters or more");
+                           MIN_LENGTH + " letters or more");
 
-        for(int i = 4; i <= grid.length; i++) {
+        for(int i = MIN_LENGTH; i <= grid.length; i++) {
             ArrayList<String> tmp = new ArrayList<String>();
             for(String s: results) {
                 if(s.length() == i ) {
@@ -85,47 +71,50 @@ public class WordTarget {
             }
         }
 
-        Runtime runtime = Runtime.getRuntime();
-        runtime.gc();
+        Runtime r = Runtime.getRuntime();
+        r.gc();
 
         long endTime = System.currentTimeMillis();
         System.out.println("Time taken: " + (endTime - startTime) + 
                            " milliseconds");
         System.out.println("Memory used: " + 
-                    ((runtime.totalMemory() - runtime.freeMemory()) / 1024) + 
-                    " kB");
-        return results;
+                    ((r.totalMemory() - r.freeMemory())/1024/1024) + " MB");
+        System.exit(0);
     }
 
     /**
      * Private method to load a puzzle text file into a char array
      * @param filename The name of the file to load
-     * @return The char array containing the text file 
+     * @return The char array containing the text file, with the "centre" letter
+     *         in upper case to avoid finding duplicate letters when searching
+     *         in the permute method.
      */
     private static char[] loadPuzzle(String filename) {
+        char[] grid = new char[9];
         try {
             BufferedReader in = new BufferedReader(new FileReader(filename));
 
             String line;
-            int letterNum = 0;
+            int n = 0;
             while( (line = in.readLine()) != null ) {
                 String[] row = line.split("\\s");
                 for(int i = 0; i < 3; i++) {
-                    if( letterNum != 4 ) {
-                        grid[letterNum] = Character.toLowerCase(
+                    if( n != MIN_LENGTH ) {
+                        grid[n] = Character.toLowerCase(
                                                 row[i].charAt(0));
                     } else {
-                        grid[letterNum] = Character.toUpperCase(
+                        grid[n] = Character.toUpperCase(
                                                 row[i].charAt(0));
                     }
-                    letterNum++;
+                    n++;
                 }
             }
         } catch( IOException e ) {
-            System.err.println("A file error occurred: " + e.getMessage());
+            System.err.println("A file error occurred: " + filename +
+                               "Error message: " + e.getMessage() + 
+                               e.getStackTrace());
             System.exit(1);
         }
-        CENTRE = grid[4];
         return grid;
     }
 
@@ -134,7 +123,7 @@ public class WordTarget {
      * @param filename The dictionary file to load
      * @return The ArrayList containing the dictionary
      */
-    private static ArrayList<String> loadDict(String filename) {
+    private static List<String> loadDict(String filename) {
         dict = new ArrayList<String>();
         try {
             BufferedReader in = new BufferedReader(
@@ -150,12 +139,18 @@ public class WordTarget {
         return dict;
     }
 
-    private static ArrayList<String> findStrings(char[] grid){
-        ArrayList<String> tmp = new ArrayList<String>();
+    /**
+     * Private method to call the permute function, provides a List to
+     * populate and the "centre" character.
+     * @param grid The puzzle grid to solve
+     * @return The List containing the words found in the puzzle
+     */
+    private static List<String> findStrings(char[] grid){
+        List<String> tmp = new ArrayList<String>();
         String str = new String(grid);
-
+        char centre = grid[4];
         tmp = permute(tmp, str, MIN_LENGTH, 
-                String.valueOf(CENTRE));
+                String.valueOf(centre));
         return tmp;        
     }
 
@@ -168,8 +163,8 @@ public class WordTarget {
      * @param centre The "centre" letter that each word must contain
      * @return The ArrayList of all dictionary words found in str
      */
-    private static ArrayList<String> permute(ArrayList<String> words, 
-                        String str, int minLength, CharSequence centre) {
+    private static List<String> permute(List<String> words, String str, 
+                                        int minLength, CharSequence centre) {
         permute("", str, words, minLength, centre);
         return words;
     }
@@ -181,9 +176,8 @@ public class WordTarget {
      * and is contained in the dictionary. If so, adds it to the ArrayList
      * of strings to be returned.
      */
-    private static void permute(String prefix, String str, 
-                        ArrayList<String> words, int minLength,
-                        CharSequence centre) {
+    private static void permute(String prefix, String str, List<String> words, 
+                                int minLength, CharSequence centre) {
         int length = str.length();
         if(prefix.length() >= minLength && prefix.contains(centre) && 
                 Collections.binarySearch(dict, prefix.toLowerCase()) >= 0) {
@@ -198,4 +192,3 @@ public class WordTarget {
         }
     }
 }
-
