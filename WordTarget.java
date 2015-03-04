@@ -18,7 +18,7 @@
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  *  IN THE SOFTWARE.
  *
  *******************************************************************************
@@ -27,13 +27,14 @@
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25
- * Last Modified:     Wednesday, March 04 2015, 11:13
+ * Last Modified:     Wednesday, March 04 2015, 15:50
  *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
  *
- * @version 0.2.1     Now includes "impossible.txt" file, ignores impossible
- *                    starting strings when permuting.
+ * @version 0.2.5     Now includes "possible.txt" file, ignores impossible
+ *                    starting strings when permuting. Results in checking
+ *                    ~150 000 strings instead of ~980 000
  */
 
 import java.util.List;
@@ -51,12 +52,12 @@ public class WordTarget {
     private static int MIN_LENGTH = 4;
     private static int count = 0;
     private static List<String> dict;
-    private static List<String> impArr;
+    private static List<String> possArr;
 
     public static void main(String[] args) {
         if( args.length < 3 ) {
         System.err.println(
-            "Usage: java Wordsquare <puzzle> <dictionary> <impFile>");
+            "Usage: java Wordsquare <puzzle> <dictionary> <strFile>");
                     System.exit(1);
         } else if( args.length == 4 ) {
             MIN_LENGTH = Integer.parseInt(args[3]);
@@ -66,7 +67,7 @@ public class WordTarget {
 
         char[] grid = loadPuzzle(args[0]);
         loadDict(args[1]);
-        loadImpFile(args[2]);
+        loadStrFile(args[2]);
 
         List<String> results = findStrings(grid);
 
@@ -176,14 +177,14 @@ public class WordTarget {
      * @param filename The dictionary file to load
      * @return The ArrayList containing the dictionary
      */
-    private static List<String> loadImpFile(String filename) {
-        impArr = new ArrayList<String>();
+    private static void loadStrFile(String filename) {
+        possArr = new ArrayList<String>();
         try {
             BufferedReader in = new BufferedReader(
                     new FileReader(filename));
             String word;
             while( (word = in.readLine()) != null ) {
-                impArr.add(word);
+                possArr.add(word);
             }
         } catch( IOException e ) {
             System.err.println("A file error occurred: " + filename+
@@ -191,7 +192,6 @@ public class WordTarget {
                                e.getStackTrace());
             System.exit(1);
         }
-        return dict;
     }
 
     /**
@@ -235,12 +235,17 @@ public class WordTarget {
                                 int minLength, CharSequence centre) {
         count++;
         int length = str.length();
-        if(Collections.binarySearch(impArr, prefix.toLowerCase()) >= 0) {
-            return;
+        String lowPre = prefix.toLowerCase();
+
+        if(prefix.length() == 4 || prefix.length() == 3) {
+            if(Collections.binarySearch(possArr, lowPre) <= 0) {
+                return;
+            }
         }
+
         if(prefix.length() >= minLength && prefix.contains(centre) &&
-                Collections.binarySearch(dict, prefix.toLowerCase()) >= 0) {
-            words.add(prefix.toLowerCase());
+                Collections.binarySearch(dict, lowPre) >= 0) {
+            words.add(lowPre);
         }
         if( length != 0 ) {
             for(int i = 0; i < length; i++) {
