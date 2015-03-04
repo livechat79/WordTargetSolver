@@ -4,21 +4,21 @@
  *  Copyright (c) 2015 Thomas Mckeesick
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to 
- *  deal in the Software without restriction, including without limitation the 
- *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+ *  of this software and associated documentation files (the "Software"), to
+ *  deal in the Software without restriction, including without limitation the
+ *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  *  sell copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions:
  *
- *  The above copyright notice and this permission notice shall be included in 
+ *  The above copyright notice and this permission notice shall be included in
  *  all copies or substantial portions of the Software.
  *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALING
  *  IN THE SOFTWARE.
  *
  *******************************************************************************
@@ -27,7 +27,7 @@
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25
- * Last Modified:     Tuesday, March 03 2015, 17:57
+ * Last Modified:     Wednesday, March 04 2015, 11:13
  *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
@@ -236,7 +236,6 @@ public class WordTarget {
         count++;
         int length = str.length();
         if(Collections.binarySearch(impArr, prefix.toLowerCase()) >= 0) {
-            //System.out.println("Sk")
             return;
         }
         if(prefix.length() >= minLength && prefix.contains(centre) &&
