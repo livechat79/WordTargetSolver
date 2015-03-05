@@ -1,14 +1,14 @@
-/*******************************************************************************
+/******************************************************************************
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2015 Thomas Mckeesick
  *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to
- *  deal in the Software without restriction, including without limitation the
- *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- *  sell copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
+ *  Permission is hereby granted, free of charge, to any person obtaining a 
+ *  copy of this software and associated documentation files (the "Software"),
+ *  to deal in the Software without restriction, including without limitation
+ *  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ *  and/or sell copies of the Software, and to permit persons to whom the
+ *  Software is furnished to do so, subject to the following conditions:
  *
  *  The above copyright notice and this permission notice shall be included in
  *  all copies or substantial portions of the Software.
@@ -18,16 +18,16 @@
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- *  IN THE SOFTWARE.
- *
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ *  DEALINGS IN THE SOFTWARE.
+ * 
  *******************************************************************************
  *
  * Class Name:        WordTarget
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25
- * Last Modified:     Wednesday, March 04 2015, 15:50
+ * Last Modified:     Thursday, March 05 2015, 16:14
  *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
@@ -164,15 +164,14 @@ public class WordTarget {
                 dict.add(word);
             }
         } catch( IOException e ) {
-            System.err.println("A file error occurred: " + filename+
+            System.err.println("A file error occurred: " + filename +
                                "Error message: " + e.getMessage() +
                                e.getStackTrace());
             System.exit(1);
         }
     }
 
-
-        /**
+    /**
      * A method that loads a dictionary text file into a tree structure
      * @param filename The dictionary file to load
      * @return The ArrayList containing the dictionary
@@ -187,7 +186,7 @@ public class WordTarget {
                 possArr.add(word);
             }
         } catch( IOException e ) {
-            System.err.println("A file error occurred: " + filename+
+            System.err.println("A file error occurred: " + filename +
                                "Error message: " + e.getMessage() +
                                e.getStackTrace());
             System.exit(1);
@@ -204,8 +203,7 @@ public class WordTarget {
         List<String> tmp = new ArrayList<String>();
         String str = new String(grid);
         char centre = grid[4];
-        tmp = permute(tmp, str, MIN_LENGTH,
-                String.valueOf(centre));
+        tmp = permute(tmp, str, String.valueOf(centre));
         return tmp;
     }
 
@@ -214,13 +212,12 @@ public class WordTarget {
      * @param words The ArrayList to populate
      * @param str   The string containing the letters to permute, the "centre"
      *              letter is capitalised.
-     * @param minLength The minimum amount of letters that a word must contain
      * @param centre The "centre" letter that each word must contain
      * @return The ArrayList of all dictionary words found in str
      */
     private static List<String> permute(List<String> words, String str,
-                                        int minLength, CharSequence centre) {
-        permute("", str, words, minLength, centre);
+                                        CharSequence centre) {
+        permute("", str, words, centre);
         return words;
     }
 
@@ -232,7 +229,7 @@ public class WordTarget {
      * of strings to be returned.
      */
     private static void permute(String prefix, String str, List<String> words,
-                                int minLength, CharSequence centre) {
+                                CharSequence centre) {
         count++;
         int length = str.length();
         String lowPre = prefix.toLowerCase();
@@ -242,8 +239,7 @@ public class WordTarget {
                 return;
             }
         }
-
-        if(prefix.length() >= minLength && prefix.contains(centre) &&
+        if(prefix.length() >= MIN_LENGTH && prefix.contains(centre) &&
                 Collections.binarySearch(dict, lowPre) >= 0) {
             words.add(lowPre);
         }
@@ -251,7 +247,7 @@ public class WordTarget {
             for(int i = 0; i < length; i++) {
                 permute(prefix + str.charAt(i),
                     str.substring(0, i) + str.substring(i+1, length),
-                    words, minLength, centre);
+                    words, centre);
             }
         }
     }
