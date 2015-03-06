@@ -27,7 +27,7 @@
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25
- * Last Modified:     Thursday, March 05 2015, 16:14
+ * Last Modified:     Friday, March 06 2015, 11:08
  *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
@@ -234,7 +234,7 @@ public class WordTarget {
         int length = str.length();
         String lowPre = prefix.toLowerCase();
 
-        if(prefix.length() == 4 || prefix.length() == 3) {
+        if(prefix.length() <= 5 && prefix.length() >= 3) {
             if(Collections.binarySearch(possArr, lowPre) <= 0) {
                 return;
             }
