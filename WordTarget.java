@@ -27,7 +27,7 @@
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25
- * Last Modified:     Friday, March 06 2015, 11:08
+ * Last Modified:     Sunday, March 08 2015, 09:53
  *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
@@ -94,8 +94,8 @@ public class WordTarget {
                     tmp.add(s);
                 }
             }
-            System.out.println("Found " + tmp.size() + " results with " + i +
-                               " letters: ");
+            System.out.println("\n\nFOUND " + tmp.size() + " RESULTS WITH " + i +
+                               " LETTERS: ");
             for(String s: tmp) {
                 System.out.println(" - " + s);
             }
