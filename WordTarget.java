@@ -27,14 +27,14 @@
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25
- * Last Modified:     Sunday, March 08 2015, 09:53
+ * Last Modified:     Sunday, March 08 2015, 10:42
  *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
  *
- * @version 0.2.5     Now includes "possible.txt" file, ignores impossible
+ * @version 0.2.7     Now includes "possible.txt" file, ignores impossible
  *                    starting strings when permuting. Results in checking
- *                    ~150 000 strings instead of ~980 000
+ *                    ~15 000 strings instead of ~980 000
  */
 
 import java.util.List;
