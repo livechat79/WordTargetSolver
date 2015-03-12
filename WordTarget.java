@@ -63,12 +63,13 @@ public class WordTarget {
                     System.exit(1);
         }
 
-        long startTime = System.currentTimeMillis();
+        //long startTime = System.currentTimeMillis();
 
         char[] grid = loadPuzzle(args[0]);
         loadDict(args[1]);
         loadPossArr();
-
+        long startTime = System.currentTimeMillis();
+        
         List<String> results = findStrings(grid);
 
         System.out.println("WORD GRID:");
@@ -180,6 +181,8 @@ public class WordTarget {
         HashSet<String> h4 = new HashSet<String>();
         HashSet<String> h5 = new HashSet<String>();
 
+        //Dictionary contains words from 4-9 letters in length
+        //so do not need to check for lengths 3 & 4
         for(String s : dict) {
             h3.add(s.substring(0, 3));
             h4.add(s.substring(0, 4));
