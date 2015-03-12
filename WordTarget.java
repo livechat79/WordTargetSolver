@@ -27,15 +27,17 @@
  *
  * @author:           Thomas McKeesick
  * Creation Date:     Monday, February 16 2015, 02:25
- * Last Modified:     Sunday, March 08 2015, 10:42
+ * Last Modified:     Thursday, March 12 2015, 17:29
  *
  * Class Description: A Java class that solves the 9 letter "Word-Target"
  *                    puzzle.
  *
- * @version 0.2.7     Now includes "possible.txt" file, ignores impossible
+ * @version 0.2.5     Now includes "possible.txt" file, ignores impossible
  *                    starting strings when permuting. Results in checking
- *                    ~15 000 strings instead of ~980 000
+ *                    ~150 000 strings instead of ~980 000
  */
+
+//import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -49,25 +51,23 @@ import java.io.IOException;
 
 public class WordTarget {
 
-    private static int MIN_LENGTH = 4;
+    private static final int MIN_LENGTH = 4;
     private static int count = 0;
     private static List<String> dict;
     private static List<String> possArr;
 
     public static void main(String[] args) {
-        if( args.length < 3 ) {
+        if( args.length < 2 ) {
         System.err.println(
-            "Usage: java Wordsquare <puzzle> <dictionary> <strFile>");
+            "Usage: java Wordsquare <puzzle> <dictionary>");
                     System.exit(1);
-        } else if( args.length == 4 ) {
-            MIN_LENGTH = Integer.parseInt(args[3]);
         }
 
         long startTime = System.currentTimeMillis();
 
         char[] grid = loadPuzzle(args[0]);
         loadDict(args[1]);
-        loadStrFile(args[2]);
+        loadPossArr();
 
         List<String> results = findStrings(grid);
 
@@ -94,8 +94,8 @@ public class WordTarget {
                     tmp.add(s);
                 }
             }
-            System.out.println("\n\nFOUND " + tmp.size() + " RESULTS WITH " + i +
-                               " LETTERS: ");
+            System.out.println("Found " + tmp.size() + " results with " + i +
+                               " letters: ");
             for(String s: tmp) {
                 System.out.println(" - " + s);
             }
@@ -172,25 +172,26 @@ public class WordTarget {
     }
 
     /**
-     * A method that loads a dictionary text file into a tree structure
-     * @param filename The dictionary file to load
-     * @return The ArrayList containing the dictionary
+     * Generates possible starts of 3-5 letters long
      */
-    private static void loadStrFile(String filename) {
-        possArr = new ArrayList<String>();
-        try {
-            BufferedReader in = new BufferedReader(
-                    new FileReader(filename));
-            String word;
-            while( (word = in.readLine()) != null ) {
-                possArr.add(word);
+    private static void loadPossArr() {
+        possArr = new ArrayList<>();
+        HashSet<String> h3 = new HashSet<String>();
+        HashSet<String> h4 = new HashSet<String>();
+        HashSet<String> h5 = new HashSet<String>();
+
+        for(String s : dict) {
+            h3.add(s.substring(0, 3));
+            h4.add(s.substring(0, 4));
+            if(s.length() >= 5) {
+                h5.add(s.substring(0, 5));
             }
-        } catch( IOException e ) {
-            System.err.println("A file error occurred: " + filename +
-                               "Error message: " + e.getMessage() +
-                               e.getStackTrace());
-            System.exit(1);
         }
+        
+        possArr.addAll(h3);
+        possArr.addAll(h4);
+        possArr.addAll(h5);
+        Collections.sort(possArr);
     }
 
     /**
@@ -233,12 +234,12 @@ public class WordTarget {
         count++;
         int length = str.length();
         String lowPre = prefix.toLowerCase();
-
         if(prefix.length() <= 5 && prefix.length() >= 3) {
             if(Collections.binarySearch(possArr, lowPre) <= 0) {
                 return;
             }
         }
+
         if(prefix.length() >= MIN_LENGTH && prefix.contains(centre) &&
                 Collections.binarySearch(dict, lowPre) >= 0) {
             words.add(lowPre);
